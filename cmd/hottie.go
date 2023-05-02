@@ -2,31 +2,19 @@ package main
 
 import (
 	"flag"
-	"fmt"
 
 	"github.com/aosasona/hottie/pkg/hottie"
 	log "github.com/charmbracelet/log"
 )
 
 func main() {
-	d := flag.String("d", ".", "Directory to serve")
-	p := flag.Int("p", 3000, "Port to serve the directory on")
+	dir := flag.String("d", ".", "Directory to serve")
+	port := flag.Int("p", 3000, "Port to serve the directory on")
+	hotReload := flag.Bool("h", false, "Enable or disable hot reloading")
 
 	flag.Parse()
 
-	// dereference once to get flag value
-	port := *p
-	dir := *d
-	h := hottie.New().SetDir(dir).SetPort(port)
-
-	log.Info(
-		fmt.Sprintf(
-			"Starting Hottie on port %d - serving %s\n\nVisit http://127.0.0.1:%d in your browser\n",
-			port,
-			dir,
-			port,
-		),
-	)
+	h := hottie.New().SetDir(*dir).SetPort(*port).SetEnableHotReload(*hotReload)
 
 	if err := h.Run(); err != nil {
 		log.Fatal(err)

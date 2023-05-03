@@ -4,7 +4,6 @@ import (
 	"mime"
 	"strings"
 
-	log "github.com/charmbracelet/log"
 	"github.com/valyala/fasthttp"
 )
 
@@ -21,27 +20,22 @@ type ParsedRequest struct {
 	FileType    FileType
 }
 
-func (h *hottie) ParseRequest(ctx *fasthttp.RequestCtx) ParsedRequest {
+func (h *hottie) parseRequest(ctx *fasthttp.RequestCtx) ParsedRequest {
 	var ext string
 	fileType := OTHER
 
-	path := string(ctx.Path())
+	path := string(ctx.Request.URI().Path())
 
 	pathParts := strings.Split(path, ".")
-	switch l := len(pathParts); {
-	case l == 1 || path == "/":
+	if path == "/" {
 		path = "index.html"
 		ext = "html"
-	case l > 1:
+	}
+	if l := len(pathParts); l > 1 {
 		ext = pathParts[l-1]
-	default:
-		log.Fatal("bad path")
 	}
 
 	contentType := mime.TypeByExtension("." + ext)
-	if contentType == "" {
-		log.Fatal("unable to determine content type")
-	}
 
 	if strings.Contains(contentType, "text/html") {
 		fileType = HTML

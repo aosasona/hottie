@@ -8,18 +8,19 @@ import (
 var (
 	TARGETED_TAGS  = []string{"</body>", "</head>"}
 	WEBSOCKET_CODE = `<script type="text/javascript">
-	/* This code is injected by Hottie to enable hot reloading. */
+/* This code is injected by Hottie to enable hot reloading. */
+console.log("Hottie is watching for changes...");
 
-  const ws = new WebSocket("ws://localhost:%d/ws");
-  ws.onmessage = function(e) {
-    if (e.data === "reload") {
-      window.location.reload();
-    }
-  })
-	</script>`
+const ws = new WebSocket("%s");
+ws.onmessage = function(e) {
+  if (e.data == "reload") {
+    window.location.reload();
+  }
+}
+</script>`
 )
 
-func injectWebsocketCode(originalHTML []byte, port int) []byte {
+func injectWebsocketCode(originalHTML []byte, websocketAddr string) []byte {
 	strHTML := string(originalHTML)
 	for _, tag := range TARGETED_TAGS {
 		tagIndex := strings.Index(strHTML, tag)
@@ -28,7 +29,7 @@ func injectWebsocketCode(originalHTML []byte, port int) []byte {
 			if tag == "</body>" {
 				newSection = tag + WEBSOCKET_CODE
 			}
-			newSection = fmt.Sprintf(newSection, port)
+			newSection = fmt.Sprintf(newSection, websocketAddr)
 			strHTML = strings.Replace(strHTML, tag, newSection, 1)
 			break
 		}

@@ -12,6 +12,7 @@ func main() {
 	dir := flag.String("dir", ".", "Directory to serve")
 	port := flag.Int("port", 3000, "Port to serve the directory on")
 	reload := flag.Bool("reload", true, "Enable or disable hot reloading")
+	openBrowser := flag.Bool("open", false, "Open the served directory in the browser")
 
 	flag.Parse()
 
@@ -20,6 +21,7 @@ func main() {
 		Dir:             *dir,
 		Port:            *port,
 		EnableHotReload: *reload,
+		OpenBrowser:     *openBrowser,
 	})
 
 	if err := h.Run(); err != nil {

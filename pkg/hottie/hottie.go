@@ -3,6 +3,8 @@ package hottie
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"runtime"
 
 	"github.com/charmbracelet/log"
 	"github.com/fasthttp/router"
@@ -14,6 +16,7 @@ type hottie struct {
 	dir             string
 	port            int
 	enableHotReload bool
+	openBrowser     bool
 	log             *log.Logger
 }
 
@@ -22,6 +25,7 @@ type HottieOpts struct {
 	Dir             string
 	Port            int
 	EnableHotReload bool
+	OpenBrowser     bool
 }
 
 var notifChan = make(chan bool)
@@ -38,19 +42,41 @@ func New() *hottie {
 
 func (h *hottie) SetOpts(opts HottieOpts) *hottie {
 	if opts.Address == "" {
-		opts.Address = "localhost"
+		opts.Address = "127.0.0.1"
 	}
 	h.addr = opts.Address
 	h.dir = opts.Dir
 	h.port = opts.Port
 	h.enableHotReload = opts.EnableHotReload
+	h.openBrowser = opts.OpenBrowser
 	return h
+}
+
+func (h *hottie) openInBrowser() {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default:
+		cmd = "xdg-open"
+	}
+
+	args = append(args, fmt.Sprintf("http://%s:%d", h.addr, h.port))
+	if err := exec.Command(cmd, args...).Start(); err != nil {
+		h.log.Error(err)
+	}
 }
 
 func (h *hottie) Run() error {
 	router := router.New()
 
 	router.SaveMatchedRoutePath = true
+	router.GET("/_/sse", h.handleSSE)
 	router.GET("/{path:*}", h.serveFile)
 
 	h.log.Info(
@@ -63,7 +89,11 @@ func (h *hottie) Run() error {
 		),
 	)
 
+	if h.openBrowser {
+		h.openInBrowser()
+	}
 	go h.watchForFileChanges()
+	defer close(notifChan)
 
 	return fasthttp.ListenAndServe(fmt.Sprintf(":%d", h.port), router.Handler)
 }

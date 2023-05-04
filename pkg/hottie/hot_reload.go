@@ -2,6 +2,7 @@ package hottie
 
 import (
 	"os"
+	"strings"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -41,8 +42,13 @@ func (h *hottie) watchForFileChanges() {
 				if !ok {
 					return
 				}
-				if event.Has(fsnotify.Write) {
+				if event.Has(fsnotify.Write) || event.Has(fsnotify.Create) ||
+					event.Has(fsnotify.Remove) {
+					if strings.Contains(event.Name, ".null-ls") {
+						continue
+					}
 					h.log.Infof("change detected -> %s", event.Name)
+					notifChan <- true
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {

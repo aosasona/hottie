@@ -1,26 +1,10 @@
 package hottie
 
 import (
-	"fmt"
-	"log"
 	"os"
-	"time"
 
-	"github.com/fasthttp/websocket"
 	"github.com/valyala/fasthttp"
 )
-
-const (
-	writeWait  = 10 * time.Second
-	pongWait   = 60 * time.Second
-	pingPeriod = (pongWait * 9) / 10
-	filePeriod = 1 * time.Second
-)
-
-var upgrader = websocket.FastHTTPUpgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
 
 func (h *hottie) serveFile(ctx *fasthttp.RequestCtx) {
 	parsedRequest := h.parseRequest(ctx)
@@ -42,9 +26,10 @@ func (h *hottie) handleHTMLRequest(ctx *fasthttp.RequestCtx, parsedRequest Parse
 
 	ctx.SetContentType(parsedRequest.ContentType)
 	ctx.Response.Header.Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	ctx.Response.Header.Set("Access-Control-Allow-Headers", "Cache-Control")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 
-	content := injectWebsocketCode(file, fmt.Sprintf("ws://%s:%d/ws", h.addr, h.port))
+	content := injectWebsocketCode(file)
 
 	ctx.SetBody(content)
 	return
@@ -64,13 +49,7 @@ func (h *hottie) handleOtherRequest(ctx *fasthttp.RequestCtx, parsedRequest Pars
 	return
 }
 
-func (h *hottie) handleWS(ctx *fasthttp.RequestCtx) {
-	err := upgrader.Upgrade(ctx, func(conn *websocket.Conn) {
-	})
-	if err != nil {
-		log.Println(err)
-		return
-	}
+func (h *hottie) handleSSE(ctx *fasthttp.RequestCtx) {
 }
 
 func (h *hottie) getFile(path string) ([]byte, string, int) {

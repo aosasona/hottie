@@ -1,6 +1,7 @@
 package hottie
 
 import (
+	"bufio"
 	"os"
 
 	"github.com/valyala/fasthttp"
@@ -50,6 +51,29 @@ func (h *hottie) handleOtherRequest(ctx *fasthttp.RequestCtx, parsedRequest Pars
 }
 
 func (h *hottie) handleSSE(ctx *fasthttp.RequestCtx) {
+	ctx.SetContentType("text/event-stream")
+	ctx.Response.Header.Set("Cache-Control", "no-cache")
+	ctx.Response.Header.Set("Connection", "keep-alive")
+	ctx.Response.Header.Set("Transfer-Encoding", "chunked")
+	ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
+	ctx.Response.Header.Set("Access-Control-Allow-Headers", "Cache-Control")
+	ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
+	ctx.SetBodyStreamWriter(fasthttp.StreamWriter(func(w *bufio.Writer) {
+		for {
+			select {
+			case e := <-notifChan:
+				var reloadType string
+				switch e {
+				case full_reload:
+					reloadType = "_full"
+				case css_reload:
+					reloadType = "_style"
+				}
+				w.WriteString("data: " + reloadType + "\n\n")
+				w.Flush()
+			}
+		}
+	}))
 }
 
 func (h *hottie) getFile(path string) ([]byte, string, int) {

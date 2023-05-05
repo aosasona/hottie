@@ -11,6 +11,14 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+type event int
+
+const (
+	_ event = iota
+	full_reload
+	css_reload
+)
+
 type hottie struct {
 	addr            string
 	dir             string
@@ -28,7 +36,7 @@ type HottieOpts struct {
 	OpenBrowser     bool
 }
 
-var notifChan = make(chan bool)
+var notifChan = make(chan event, 16)
 
 func New() *hottie {
 	logger := log.NewWithOptions(os.Stdout, log.Options{

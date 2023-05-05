@@ -47,8 +47,12 @@ func (h *hottie) watchForFileChanges() {
 					if strings.Contains(event.Name, ".null-ls") {
 						continue
 					}
+					evt := full_reload
+					if strings.Contains(event.Name, ".css") {
+						evt = css_reload
+					}
 					h.log.Infof("change detected -> %s", event.Name)
-					notifChan <- true
+					notifChan <- evt
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {

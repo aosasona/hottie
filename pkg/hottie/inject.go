@@ -7,7 +7,7 @@ import (
 var (
 	TARGETED_TAGS  = []string{"</body>", "</head>"}
 	WEBSOCKET_CODE = `
-<!-- This code was injected by Hottie (https://github.com/aosaona/hottie) -->
+<!-- This code was injected by Hottie (https://github.com/aosasona/hottie) -->
 <script type="text/javascript">
 	if (typeof(EventSource) !== "undefined") {
 		function reloadStylesheets() {

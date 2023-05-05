@@ -36,7 +36,7 @@ type HottieOpts struct {
 	OpenBrowser     bool
 }
 
-var notifChan = make(chan event, 16)
+var notifChan = make(chan event, 4)
 
 func New() *hottie {
 	logger := log.NewWithOptions(os.Stdout, log.Options{
@@ -100,7 +100,10 @@ func (h *hottie) Run() error {
 	if h.openBrowser {
 		h.openInBrowser()
 	}
-	go h.watchForFileChanges()
+	if h.enableHotReload {
+		go h.watchForFileChanges()
+	}
+
 	defer close(notifChan)
 
 	return fasthttp.ListenAndServe(fmt.Sprintf(":%d", h.port), router.Handler)

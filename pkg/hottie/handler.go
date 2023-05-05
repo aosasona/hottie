@@ -30,9 +30,11 @@ func (h *hottie) handleHTMLRequest(ctx *fasthttp.RequestCtx, parsedRequest Parse
 	ctx.Response.Header.Set("Access-Control-Allow-Headers", "Cache-Control")
 	ctx.SetStatusCode(fasthttp.StatusOK)
 
-	content := injectWebsocketCode(file)
+	if h.enableHotReload {
+		file = injectWebsocketCode(file)
+	}
 
-	ctx.SetBody(content)
+	ctx.SetBody(file)
 	return
 }
 

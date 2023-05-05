@@ -6,11 +6,31 @@ _(Pardon the name, I just had to.)_
 
 # Installation
 
+## Homebrew
+
+```bash
+brew tap aosasona/hottie && brew install hottie
+```
+
+## Go
+
 ```bash
 go install github.com/aosasona/hottie
 ```
 
+## Binary/executable
+
 You can also download any of the binaries from the [releases page](https://github.com/aosasona/hottie/releases).
+
+## Building from source
+
+```bash
+git clone https://github.com/aosasona/hottie.git
+cd hottie
+go build
+```
+
+> You need the Go compiler/toolchain to build this package from source code.
 
 # Usage
 

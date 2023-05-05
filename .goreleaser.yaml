@@ -1,5 +1,11 @@
 # This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
+brews:
+  - name: hottie
+    homepage: https://github.com/aosasona/homebrew-hottie
+    tap:
+      owner: aosasona
+      name: homebrew-hottie
 builds:
   - env:
       - CGO_ENABLED=0
@@ -32,6 +38,8 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+env_files:
+  github_token: ./github_token # for local builds
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
